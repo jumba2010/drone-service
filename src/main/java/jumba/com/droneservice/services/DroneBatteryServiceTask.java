@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -24,8 +25,9 @@ public class DroneBatteryServiceTask {
 
     private static final Logger logger = LoggerFactory.getLogger(DroneService.class);
 
-    @Scheduled(fixedRate = 300000) // Run every 5 minutes (300000 milliseconds)
+    @Scheduled(fixedRate = 90000) // Run every 5 minutes (300000 milliseconds)
     public void checkDronesBatteryLevel() {
+        logger.info("Starting task for checking battery capacity");
         List<Drone> drones = droneRepository.findAll();
         drones.stream()
                 .forEach(drone -> {
@@ -40,6 +42,7 @@ public class DroneBatteryServiceTask {
                             .batteryCapacity(drone.getBatteryCapacity())
                             .drone(drone)
                             .state(drone.getState())
+                            .timestamp(LocalDateTime.now())
                             .batteryState(BatteryState.getState(drone.getBatteryCapacity())).build(); ;
                     droneHistoryRepository.save(history);
                 });

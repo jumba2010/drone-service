@@ -16,6 +16,13 @@ public class DroneValidator {
         }
     }
 
+
+    public static void validateIdleDroneState(Drone drone) {
+        if (drone.getState() == DroneState.IDLE) {
+            throw new BusinessException("Cannot unload an idle Drone");
+        }
+    }
+
     public static void validateMedications(Drone drone,List<Medication> medications, List<Long> medicationIds) {
         if (medications.size() != medicationIds.size()) {
             throw new EntityNotFoundException("One or more medications not found");

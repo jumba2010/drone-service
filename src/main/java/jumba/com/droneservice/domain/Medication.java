@@ -1,7 +1,11 @@
 package jumba.com.droneservice.domain;
 
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.validation.constraints.Min;
@@ -9,13 +13,15 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 
 @Entity
 @Data
 public class Medication {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Pattern(regexp = "^[a-zA-Z0-9_-]*$")
     private String code;
 
