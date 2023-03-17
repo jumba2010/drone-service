@@ -23,9 +23,9 @@ public class DroneBatteryServiceTask {
     private final DroneRepository droneRepository;
     private final DroneHistoryRepository droneHistoryRepository;
 
-    private static final Logger logger = LoggerFactory.getLogger(DroneService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DroneBatteryServiceTask.class);
 
-    @Scheduled(fixedRate = 90000) // Run every 5 minutes (300000 milliseconds)
+    @Scheduled(fixedRate = 120000) // Run every 2 minutes (120000 milliseconds)
     public void checkDronesBatteryLevel() {
         logger.info("Starting task for checking battery capacity");
         List<Drone> drones = droneRepository.findAll();

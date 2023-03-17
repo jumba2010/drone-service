@@ -49,6 +49,19 @@ A Java-based application for managing drone delivery services.
 ```
 
 
+####  Unloads medications from a drone and updates the drone's state to IDLE when it has no medications left
+
+```http
+  DELETE /api/v1/drones/{droneSerialNumber}/medications
+```
+#### Payload
+``` 
+{
+"medicationIds": [1, 2, 3]
+}
+```
+
+
 ####  Returns a list of medications currently loaded on the drone identified by the given serial number
 
 ```http
@@ -108,7 +121,7 @@ docker run -p 8085:8085 drone-service
 
 ```
 
-Access the application at http://localhost:8085 in your web browser.
+Your application will be available on http://localhost:8085 . You can start performing the apis call
 
 
 ## Contributors
