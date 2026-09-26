@@ -12,9 +12,9 @@ import jumba.com.droneservice.repository.DroneRepository;
 import jumba.com.droneservice.repository.MedicationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +40,7 @@ public class DroneService {
      @param drone the drone to be registered
      @return the registered drone
      */
+    @Transactional
     public Drone registerDrone(Drone drone) {
         return droneRepository.save(drone);
     }
@@ -49,6 +50,7 @@ public class DroneService {
      Retrieves a list of available drones that can be loaded with medications
      @return a list of available drones
      */
+    @Transactional(readOnly = true)
     public List<Drone> getAvailableDronesForLoading() {
         return droneRepository.findByState(DroneState.IDLE);
     }
@@ -58,6 +60,7 @@ public class DroneService {
      Retrieves a list of all medications available in the system
      @return a list of all medications
      */
+    @Transactional(readOnly = true)
     public List<Medication> getAllMedications() {
         return medicationRepository.findAll();
     }
@@ -71,8 +74,11 @@ public class DroneService {
      @param medicationIds the list of medication IDs to be loaded onto the drone
 
      @throws BusinessException if there is an error during the loading process
+     <p>Runs in a single transaction so the medication-to-drone assignment (owned by
+     {@link Medication}) is flushed via dirty checking, and a validation failure leaves no partial state.</p>
      */
-    public void loadDroneWithMedications(String droneSerialNumber, ArrayList<Long> medicationIds) throws BusinessException {
+    @Transactional
+    public void loadDroneWithMedications(String droneSerialNumber, List<Long> medicationIds) throws BusinessException {
         Drone drone = droneRepository.findBySerialNumber(droneSerialNumber).orElseThrow(
                 () -> new EntityNotFoundException("Drone not found"));
 
@@ -106,6 +112,7 @@ public class DroneService {
 
      @throws BusinessException if there is an error during the unloading process
      */
+    @Transactional
     public void unloadMedicationsFromDrone(String droneSerialNumber, List<Long> medicationIds) throws BusinessException {
         Drone drone = droneRepository.findBySerialNumber(droneSerialNumber).orElseThrow(
                 () -> new EntityNotFoundException("Drone not found"));
@@ -152,6 +159,7 @@ public class DroneService {
  @param droneSerialNumber The serial number of the drone to retrieve the loaded medications for.
  @return A list of medications currently loaded on the drone.
  @throws BusinessException If the drone identified by the given serial number is not found */
+    @Transactional(readOnly = true)
     public List<Medication> getLoadedMedicationsForDrone(String droneSerialNumber) throws BusinessException {
         Drone drone = droneRepository.findBySerialNumber(droneSerialNumber).orElseThrow(
                 () -> new EntityNotFoundException("Drone not found"));
