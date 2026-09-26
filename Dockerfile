@@ -1,21 +1,23 @@
-# Use a JDK 17 base image
-FROM azul/zulu-openjdk:17
+# syntax=docker/dockerfile:1.7
 
-# Set the working directory to /app
-WORKDIR /app
+# ---- Build stage: compile and test with the Gradle wrapper on JDK 17 ----
+FROM eclipse-temurin:17-jdk-jammy AS build
+WORKDIR /workspace
 
-# Copy the Gradle files to the container
-COPY gradlew .
+# Resolve dependencies first so they are cached between source changes
+COPY gradlew settings.gradle build.gradle ./
 COPY gradle gradle
+RUN --mount=type=cache,target=/root/.gradle ./gradlew --no-daemon dependencies > /dev/null
 
-# Run the Gradle Wrapper to download the dependencies
-RUN ./gradlew --no-daemon --console plain --quiet --refresh-dependencies
+COPY src src
+RUN --mount=type=cache,target=/root/.gradle ./gradlew --no-daemon bootJar
 
-# Copy the rest of the application files to the container
-COPY . .
+# ---- Runtime stage: slim JRE, non-root user ----
+FROM eclipse-temurin:17-jre-jammy
+RUN useradd --uid 10001 --create-home --shell /usr/sbin/nologin appuser
+WORKDIR /app
+COPY --from=build /workspace/build/libs/drone-service-*-SNAPSHOT.jar app.jar
+USER appuser
 
-# Build the application
-RUN ./gradlew build
-
-# Start the application
-CMD ["java", "-jar", "build/libs/drone-service-0.0.1-SNAPSHOT.jar"]
+EXPOSE 8085
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "app.jar"]
