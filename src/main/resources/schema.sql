@@ -21,8 +21,8 @@ CREATE TABLE medication (
 
 CREATE TABLE delivery (
   id BIGINT NOT NULL AUTO_INCREMENT,
-  drone_id VARCHAR(100),
-  medication_id VARCHAR(255),
+  drone_id BIGINT,
+  medication_id BIGINT,
   status VARCHAR(255),
   delivery_date TIMESTAMP NOT NULL,
   PRIMARY KEY (id),
