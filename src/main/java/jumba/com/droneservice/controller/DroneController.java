@@ -45,7 +45,8 @@ public class DroneController {
     }
 
     @DeleteMapping("/{droneSerialNumber}/medications")
-    public ResponseEntity<Void> unloadMedicationsFromDrone(@PathVariable String droneSerialNumber, @RequestBody MedicationRequest medicationRequest) throws BusinessException {
+    public ResponseEntity<Void> unloadMedicationsFromDrone(@PathVariable String droneSerialNumber,
+            @Valid @RequestBody MedicationRequest medicationRequest) throws BusinessException {
         droneService.unloadMedicationsFromDrone(droneSerialNumber, medicationRequest.getMedicationIds());
         return ResponseEntity.ok().build();
     }
