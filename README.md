@@ -44,13 +44,13 @@ drone state machine - and runs a scheduled battery audit that keeps a historical
 
 ```mermaid
 flowchart LR
-    Client([REST client]) --> Controller[DroneController<br/>/api/v1/drones]
-    Controller --> Service[DroneService<br/>@Transactional]
-    Service --> Validator[DroneValidator<br/>business rules]
-    Service --> Repos[(Spring Data JPA<br/>repositories)]
-    Scheduler[DroneBatteryServiceTask<br/>@Scheduled every 2 min] --> Repos
-    Repos --> H2[(H2)]
-    Controller -.errors.-> Advice[ExceptionControllerAdvice]
+    Client(["REST client"]) --> Controller["DroneController<br/>/api/v1/drones"]
+    Controller --> Service["DroneService<br/>@Transactional"]
+    Service --> Validator["DroneValidator<br/>business rules"]
+    Service --> Repos[("Spring Data JPA<br/>repositories")]
+    Scheduler["DroneBatteryServiceTask<br/>@Scheduled every 2 min"] --> Repos
+    Repos --> H2[("H2")]
+    Controller -. "errors" .-> Advice["ExceptionControllerAdvice"]
 ```
 
 ```
