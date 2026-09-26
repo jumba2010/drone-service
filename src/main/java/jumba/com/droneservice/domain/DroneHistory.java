@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.hibernate.annotations.Table;
@@ -23,6 +24,7 @@ import java.time.LocalDateTime;
 @Builder
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class DroneHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

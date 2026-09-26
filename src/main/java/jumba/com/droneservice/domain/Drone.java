@@ -11,10 +11,15 @@ import jumba.com.droneservice.utils.BusinessConstants;
 import lombok.Data;
 import jakarta.persistence.Id;
 
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,9 +31,9 @@ public class Drone {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Size(max = 100)
-    @Column(name = "serial_number",nullable = false)
-    @NotNull
+    @Column(name = "serial_number", nullable = false, unique = true)
     private String serialNumber;
 
     @Enumerated(EnumType.STRING)
@@ -36,8 +41,9 @@ public class Drone {
     @NotNull
     private DroneModel model;
 
-    @Size(max = 500)
-    @Column(name = "weight_limit",nullable = false)
+    @Positive
+    @DecimalMax(value = "500", message = "weight limit must not exceed 500 grams")
+    @Column(name = "weight_limit", nullable = false)
     private double weightLimit;
 
     @Min(BusinessConstants.MIN_BATTERY_CAPACITY) @Max(BusinessConstants.MAX_BATTERY_CAPACITY)
@@ -45,21 +51,38 @@ public class Drone {
     private int batteryCapacity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "state",nullable = false)
-    @Size(max = 100)
-    private DroneState state;
+    @Column(name = "state", nullable = false)
+    private DroneState state = DroneState.IDLE;
 
+    // Excluded from equals/hashCode/toString to avoid infinite recursion through the
+    // bidirectional Drone <-> Medication association and accidental lazy loading.
     @OneToMany(mappedBy = "drone")
-    private List<Medication> loadedMedications=new ArrayList<>();
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Medication> loadedMedications = new ArrayList<>();
 
+    /**
+     * Assigns the medications to this drone, keeping both sides of the association in sync.
+     * {@link Medication#getDrone()} is the owning side, so it is what Hibernate persists.
+     */
     public void loadMedications(List<Medication> medications) {
-        medications.stream()
-                .peek(medication -> medication.setDrone(this))
-                .forEach(loadedMedications::add);
+        medications.forEach(medication -> {
+            medication.setDrone(this);
+            loadedMedications.add(medication);
+        });
     }
 
+    /**
+     * Detaches the given medications from this drone on both sides of the association.
+     */
     public void removeMedications(List<Long> medicationIds) {
-        loadedMedications.removeIf(m -> medicationIds.contains(m.getId()));
+        loadedMedications.removeIf(medication -> {
+            boolean remove = medicationIds.contains(medication.getId());
+            if (remove) {
+                medication.setDrone(null);
+            }
+            return remove;
+        });
     }
 }
 
